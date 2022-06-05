@@ -31,18 +31,10 @@ class BaseModel(ABC):
         """
         self.opt = opt
         self.gpu_ids = opt.gpu_ids
-        self.isTrain = opt.isTrain
+        # self.isTrain = opt.isTrain
         self.device = torch.device('cuda:{}'.format(self.gpu_ids[0])) if self.gpu_ids else torch.device(
             'cpu')  # get device name: CPU or GPU
-        self.save_dir = os.path.join(opt.checkpoints_dir, opt.name)  # save all the checkpoints to save_dir
-        if opt.preprocess != 'scale_width':  # with [scale_width], input images might have different sizes, which hurts the performance of cudnn.benchmark.
-            torch.backends.cudnn.benchmark = True
-        self.loss_names = []
-        self.model_names = []
-        self.visual_names = []
-        self.optimizers = []
-        self.image_paths = []
-        self.metric = 0  # used for learning rate policy 'plateau'
+
 
     # @staticmethod
     def modify_commandline_options(parser, is_train):

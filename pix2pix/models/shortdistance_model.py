@@ -42,7 +42,6 @@ class ShortDistanceModel(BaseModel, ABC):
             opt (Option class)-- stores all the experiment flags; needs to be a subclass of BaseOptions
         """
         BaseModel.__init__(self, opt)
-        self.device = 'cuda:5'
         # define networks
         self.model = MidasNet(path=None).to(self.device)
 
