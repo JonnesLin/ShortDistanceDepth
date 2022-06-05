@@ -60,6 +60,12 @@ class ShortDistanceModel(BaseModel, ABC):
         self.total_metrics = [0] * 7
         self.total_times = 0
 
+    def train(self):
+        self.model.train()
+
+    def eval(self):
+        self.model.eval()
+
     def set_input_train(self, rgb_img, depth_map_img):
         self.rgb_img = rgb_img.to(self.device)
         self.depth_map_img = depth_map_img.to(self.device)

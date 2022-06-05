@@ -68,6 +68,13 @@ class BaseModel(ABC):
         """Calculate losses, gradients, and update network weights; called in every training iteration"""
         pass
 
+    def eval(self):
+        """Make models eval mode during test time"""
+        pass
+
+    def train(self):
+        """Make models eval mode during test time"""
+        pass
 
     def test(self):
         """Forward function used in test time.
