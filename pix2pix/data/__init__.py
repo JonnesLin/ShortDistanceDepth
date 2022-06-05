@@ -14,6 +14,7 @@ import importlib
 import torch.utils.data
 from pix2pix.data.base_dataset import BaseDataset
 import albumentations as A
+from albumentations.pytorch import ToTensorV2
 
 
 def find_dataset_using_name(dataset_name):
