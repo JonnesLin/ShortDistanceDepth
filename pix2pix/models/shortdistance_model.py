@@ -85,6 +85,7 @@ class ShortDistanceModel(BaseModel, ABC):
     def optimize_parameters(self):
         # compute a depth map
         self.forward()
+        self.calculate_loss()
         self.update_model()
 
     def get_current_losses(self):
