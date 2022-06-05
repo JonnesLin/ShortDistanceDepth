@@ -6,13 +6,44 @@ import time
 from . import util, html
 from subprocess import Popen, PIPE
 import torch
-
+import matplotlib
 
 if sys.version_info[0] == 2:
     VisdomExceptionBase = Exception
 else:
     VisdomExceptionBase = ConnectionError
 
+
+def simply_print(loss, result_log):
+    print("Eval Loss:%.3f" % loss)
+    print("-- Lower is better:", end='')
+    print('rmse:%.3f, log_rms:%.3f, absrel:%.3f, sqrel:%.3f' % (result_log[0], result_log[1], result_log[2], result_log[3]))
+    print("-- Higher is better:", end='')
+    print('a1:%.3f, a2:%.3f, a3:%.3f' % (result_log[4], result_log[5], result_log[6]))
+
+def colormap(image, cmap="jet"):
+    image_min = torch.min(image)
+    image_max = torch.max(image)
+    image = (image - image_min) / (image_max - image_min)
+
+    image = torch.squeeze(image)
+
+    if len(image.shape) == 2:
+        image = image.unsqueeze(0)
+
+    # quantize
+    indices = torch.round(image * 255).long()
+    indices = torch.clip(indices, min=0, max=255)
+    # gather
+    cm = matplotlib.cm.get_cmap(cmap if cmap is not None else 'gray')
+
+    colors = cm(np.arange(256))[:, :3]
+    # colors = torch.cuda.FloatTensor(colors)
+    colors = torch.FloatTensor(colors)
+
+    color_map = colors[indices].transpose(2, 3).transpose(1, 2)
+    colors = colors.cuda()
+    return color_map
 
 def save_images(webpage, visuals, image_path, aspect_ratio=1.0, width=256):
     """Save images to the disk.

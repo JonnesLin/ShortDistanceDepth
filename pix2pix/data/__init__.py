@@ -29,11 +29,13 @@ def find_dataset_using_name(dataset_name):
     target_dataset_name = dataset_name.replace('_', '') + 'dataset'
     for name, cls in datasetlib.__dict__.items():
         if name.lower() == target_dataset_name.lower() \
-           and issubclass(cls, BaseDataset):
+                and issubclass(cls, BaseDataset):
             dataset = cls
 
     if dataset is None:
-        raise NotImplementedError("In %s.py, there should be a subclass of BaseDataset with class name that matches %s in lowercase." % (dataset_filename, target_dataset_name))
+        raise NotImplementedError(
+            "In %s.py, there should be a subclass of BaseDataset with class name that matches %s in lowercase." % (
+            dataset_filename, target_dataset_name))
 
     return dataset
 
@@ -45,24 +47,21 @@ def get_option_setter(dataset_name):
 
 
 def create_dataset(opt):
-    """Create a dataset given the option.
-
-    This function wraps the class CustomDatasetDataLoader.
-        This is the main interface between this package and 'train.py'/'test.py'
-
-    Example:
-        >>> from data import create_dataset
-        >>> dataset = create_dataset(opt)
-    """
-    data_loader = CustomDatasetDataLoader(opt)
-    dataset = data_loader.load_data()
+    custom_dataset = CustomDatasetDataLoader(opt)
+    dataset = custom_dataset.get_dataset()
     return dataset
+
+
+def create_dataloader(opt, train=True):
+    custom_dataset = CustomDatasetDataLoader(opt, train=train)
+    data_loader = custom_dataset.get_loader()
+    return data_loader
 
 
 class CustomDatasetDataLoader():
     """Wrapper class of Dataset class that performs multi-threaded data loading"""
 
-    def __init__(self, opt):
+    def __init__(self, opt, train=True):
         """Initialize this class
 
         Step 1: create a dataset instance given the name [dataset_mode]
@@ -75,8 +74,14 @@ class CustomDatasetDataLoader():
         self.dataloader = torch.utils.data.DataLoader(
             self.dataset,
             batch_size=opt.batch_size,
-            shuffle=not opt.serial_batches,
+            shuffle=train,
             num_workers=int(opt.num_threads))
+
+    def get_dataset(self):
+        return self.dataset
+
+    def get_loader(self):
+        return self.dataloader
 
     def load_data(self):
         return self

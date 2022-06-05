@@ -8,6 +8,7 @@ import torch
 from PIL import Image
 import cv2
 
+
 def normalize(img):
     img = img * 2
     img = img - 1
@@ -18,11 +19,11 @@ def normalize01(img):
     return (img - torch.min(img)) / (torch.max(img) - torch.min(img))
 
 
-
 def read_image_data(image_path):
     image = cv2.imread(image_path)
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     return image
+
 
 class ShortDistanceDataset(BaseDataset):
 
@@ -51,8 +52,7 @@ class ShortDistanceDataset(BaseDataset):
             data_rgb, data_depth_map = combined_imges['image'], combined_imges['mask']
             data_depth_map = data_depth_map.squeeze(0)
 
-        return {'data_rgb': data_rgb, 'data_depth_map': data_depth_map}
-
+        return data_rgb, data_depth_map
 
     def __len__(self):
         """Return the total number of images."""

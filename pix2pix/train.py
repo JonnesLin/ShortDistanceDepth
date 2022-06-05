@@ -19,49 +19,63 @@ See training and test tips at: https://github.com/junyanz/pytorch-CycleGAN-and-p
 See frequently asked questions at: https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix/blob/master/docs/qa.md
 """
 import time
+
+import torch as torch
+
 from options.train_options import TrainOptions
-from data import create_dataset
+from data import create_dataset, create_dataloader
 from models import create_model
-from util.visualizer import Visualizer
+from util.visualizer import Visualizer, simply_print
+from tensorboardX import SummaryWriter
 
 if __name__ == '__main__':
-    opt = TrainOptions().parse()   # get training options
+    opt = TrainOptions().parse()  # get training options
     # opt.serial_batches = True
-    dataset = create_dataset(opt)  # create a dataset given opt.dataset_mode and other options
-    dataset_size = len(dataset)    # get the number of images in the dataset.
+    train_dataset = create_dataset(opt)  # create a dataset given opt.dataset_mode and other options
+    train_dataloader = create_dataloader(opt, train=True)
+    eval_dataloader = create_dataloader(opt, train=False)
+    dataset_size = len(train_dataset)  # get the number of images in the dataset.
+    writer = SummaryWriter(log_dir=opt.log_dir)
     print('The number of training images = %d' % dataset_size)
 
-    model = create_model(opt)      # create a model given opt.model and other options
-    model.setup(opt)               # regular setup: load and print networks; create schedulers
-    visualizer = Visualizer(opt)   # create a visualizer that display/save images and plots
+    model = create_model(opt)  # create a model given opt.model and other options
+    model.setup(opt)  # regular setup: load and print networks; create schedulers
+    visualizer = Visualizer(opt)  # create a visualizer that display/save images and plots
+    total_iteration = 0
+    for epoch in range(opt.epoch_count, opt.n_epochs + opt.epoch_count):
+        epoch_iter = 0  # the number of training iterations in current epoch, reset to 0 every epoch
+        visualizer.reset()  # reset the visualizer: make sure it saves the results to HTML at least once every epoch
+        model.update_learning_rate()  # update learning rates in the beginning of every epoch.
+        total_loss = 0
+        model.train()
+        for i, (rgb_img, depth_img) in enumerate(train_dataloader):  # inner loop within one epoch
+            epoch_iter += rgb_img.shape[0]
+            total_iteration += 1
+            model.set_input_train(rgb_img, depth_img)  # unpack data from dataset and apply preprocessing
+            model.optimize_parameters()  # calculate loss functions, get gradients, update network weights
+            total_loss += model.get_current_losses()
+        # Visualize training images
+        model.write_visuals(writer, epoch, 'train')
+        # Visualize training performance
+        model.record_metrics()
+        model.write_performance(writer, epoch, 'train')
+        writer.add_scalar('train/loss', total_loss/i, epoch)
+        model.eval()
+        with torch.no_grad():
+            total_loss = 0
+            for i, (rgb_img, depth_img) in enumerate(eval_dataloader):  # inner loop within one epoch
+                total_iteration += 1
+                model.set_input_train(rgb_img, depth_img)  # unpack data from dataset and apply preprocessing
+                model.forward()
+                model.calculate_loss()  # calculate loss functions
+                total_loss += model.get_current_losses()
 
-    for epoch in range(opt.epoch_count, opt.n_epochs + opt.n_epochs_decay + 1):    # outer loop for different epochs; we save the model by <epoch_count>, <epoch_count>+<save_latest_freq>
-        epoch_start_time = time.time()  # timer for entire epoch
-        iter_data_time = time.time()    # timer for data loading per iteration
-        epoch_iter = 0                  # the number of training iterations in current epoch, reset to 0 every epoch
-        visualizer.reset()              # reset the visualizer: make sure it saves the results to HTML at least once every epoch
-        model.update_learning_rate()    # update learning rates in the beginning of every epoch.
-        for i, data in enumerate(dataset):  # inner loop within one epoch
-            iter_start_time = time.time()  # timer for computation per iteration
+            # Visualize training images
+            model.write_visuals(writer, epoch, 'eval')
+            # Visualize training performance
+            model.record_metrics()
+            model.write_performance(writer, epoch, 'eval')
+            writer.add_scalar('eval/loss', total_loss / i, epoch)
+        print('Epoch: %d' % epoch)
+        simply_print(total_loss/i, model.get_metrics())
 
-            epoch_iter += opt.batch_size
-            model.set_input_train(data)         # unpack data from dataset and apply preprocessing
-            model.optimize_parameters()   # calculate loss functions, get gradients, update network weights
-
-            if epoch_iter == dataset_size:
-                model.compute_visuals()
-                visualizer.display_current_results(model.get_current_visuals(), epoch, True)
-
-            if epoch_iter % 500 == 0 or epoch_iter == dataset_size:    # print training losses and save logging information to the disk
-                losses = model.get_current_losses()
-                t_data = iter_start_time - iter_data_time
-                t_comp = (time.time() - iter_start_time) / opt.batch_size
-                visualizer.print_current_losses(epoch, epoch_iter, losses, t_comp, t_data)
-
-
-        if epoch % opt.save_epoch_freq == 0:              # cache our model every <save_epoch_freq> epochs
-            print('saving the model at the end of epoch %d' % epoch)
-            model.save_networks('latest')
-            model.save_networks(epoch)
-
-        print('End of epoch %d / %d \t Time Taken: %d sec' % (epoch, opt.n_epochs + opt.n_epochs_decay, time.time() - epoch_start_time))
