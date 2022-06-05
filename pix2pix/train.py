@@ -42,12 +42,12 @@ if __name__ == '__main__':
     print('The number of training images = %d' % dataset_size)
 
     model = create_model(opt)  # create a model given opt.model and other options
-    model.setup(opt)  # regular setup: load and print networks; create schedulers
-    visualizer = Visualizer(opt)  # create a visualizer that display/save images and plots
+    # model.setup(opt)  # regular setup: load and print networks; create schedulers
+    # visualizer = Visualizer(opt)  # create a visualizer that display/save images and plots
     total_iteration = 0
     for epoch in range(opt.epoch_count, opt.n_epochs + opt.epoch_count):
         epoch_iter = 0  # the number of training iterations in current epoch, reset to 0 every epoch
-        visualizer.reset()  # reset the visualizer: make sure it saves the results to HTML at least once every epoch
+        # visualizer.reset()  # reset the visualizer: make sure it saves the results to HTML at least once every epoch
         model.update_learning_rate()  # update learning rates in the beginning of every epoch.
         total_loss = 0
         model.train()
