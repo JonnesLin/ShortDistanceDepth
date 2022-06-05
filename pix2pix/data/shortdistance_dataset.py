@@ -50,7 +50,7 @@ class ShortDistanceDataset(BaseDataset):
 
         # Transform
         if self.transform is not None:
-            combined_images = self.rgb_transform(image=data_rgb, mask=data_depth_map)
+            combined_images = self.transform(image=data_rgb, mask=data_depth_map)
             data_rgb, data_depth_map = combined_images['image'], combined_images['mask']
             data_depth_map = data_depth_map.squeeze(0)
 
