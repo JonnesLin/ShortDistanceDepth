@@ -13,6 +13,7 @@ See our template dataset class 'template_dataset.py' for more details.
 import importlib
 import torch.utils.data
 from pix2pix.data.base_dataset import BaseDataset
+import albumentations as A
 
 
 def find_dataset_using_name(dataset_name):
@@ -68,9 +69,42 @@ class CustomDatasetDataLoader():
         Step 2: create a multi-threaded data loader.
         """
         self.opt = opt
+        transform = None
+        if train:
+            transform = A.Compose(
+                [
+                    A.Resize(384, 384),
+                    A.RandomBrightnessContrast(),
+                    A.Rotate(limit=80),
+                    A.augmentations.transforms.Flip(),
+                    # A.ShiftScaleRotate(shift_limit=0.2, scale_limit=0.2, rotate_limit=30, p=0.5),
+                    A.RGBShift(r_shift_limit=25, g_shift_limit=25, b_shift_limit=25, p=0.5),
+                    # A.RandomBrightnessContrast(brightness_limit=0.3, contrast_limit=0.3, p=0.5),
+                    # A.augmentations.geometric.rotate.SafeRotate (limit=90),
+                    # A.augmentations.dropout.grid_dropout.GridDropout(ratio=0.2),
+                    A.Normalize(mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5)),
+                    # A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
+                    ToTensorV2(transpose_mask=True),
+                ]
+            )
+        else:
+            transform = A.Compose(
+                [
+                    A.Resize(384, 384),
+                    # A.ShiftScaleRotate(shift_limit=0.2, scale_limit=0.2, rotate_limit=30, p=0.5),
+                    # A.RGBShift(r_shift_limit=25, g_shift_limit=25, b_shift_limit=25, p=0.5),
+                    # A.RandomBrightnessContrast(brightness_limit=0.3, contrast_limit=0.3, p=0.5),
+                    A.Normalize(mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5)),
+                    # A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
+                    ToTensorV2(transpose_mask=True),
+                    # ToTensorV2(),
+                ]
+            )
         dataset_class = find_dataset_using_name(opt.dataset_mode)
-        self.dataset = dataset_class(opt)
+        self.dataset = dataset_class(opt, transform=transform)
         print("dataset [%s] was created" % type(self.dataset).__name__)
+
+
         self.dataloader = torch.utils.data.DataLoader(
             self.dataset,
             batch_size=opt.batch_size,
