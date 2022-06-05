@@ -30,6 +30,7 @@ from data import create_dataset, create_dataloader
 from models import create_model
 from util.visualizer import Visualizer, simply_print
 from tensorboardX import SummaryWriter
+from tqdm import tqdm
 
 if __name__ == '__main__':
     opt = TrainOptions().parse()  # get training options
@@ -48,10 +49,10 @@ if __name__ == '__main__':
     for epoch in range(opt.epoch_count, opt.n_epochs + opt.epoch_count):
         epoch_iter = 0  # the number of training iterations in current epoch, reset to 0 every epoch
         # visualizer.reset()  # reset the visualizer: make sure it saves the results to HTML at least once every epoch
-
+        print('Epoch: %d' % epoch)
         total_loss = 0
         model.train()
-        for i, (rgb_img, depth_img) in enumerate(train_dataloader):  # inner loop within one epoch
+        for i, (rgb_img, depth_img) in tqdm(enumerate(train_dataloader)):  # inner loop within one epoch
             epoch_iter += rgb_img.shape[0]
             total_iteration += 1
             model.set_input_train(rgb_img, depth_img)  # unpack data from dataset and apply preprocessing
@@ -67,7 +68,8 @@ if __name__ == '__main__':
         model.eval()
         with torch.no_grad():
             total_loss = 0
-            for i, (rgb_img, depth_img) in enumerate(eval_dataloader):  # inner loop within one epoch
+            print('Epoch: %d' % epoch)
+            for i, (rgb_img, depth_img) in tqdm(enumerate(eval_dataloader)):  # inner loop within one epoch
                 total_iteration += 1
                 model.set_input_train(rgb_img, depth_img)  # unpack data from dataset and apply preprocessing
                 model.forward()
@@ -80,6 +82,6 @@ if __name__ == '__main__':
             model.record_metrics()
             model.write_performance(writer, epoch, 'eval')
             writer.add_scalar('eval/loss', total_loss / i, epoch)
-        print('Epoch: %d' % epoch)
+
         simply_print(total_loss/i, model.get_metrics())
 
