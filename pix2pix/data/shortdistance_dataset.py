@@ -39,8 +39,10 @@ class ShortDistanceDataset(BaseDataset):
 
     def __getitem__(self, index):
         # Read data
-        data_rgb = read_image_data(self.rgb_paths[index])  # needs to be a tensor
-        data_depth_map = read_image_data(self.depth_map_paths[index])  # needs to be a tensor
+        rgb_path = os.path.join(self.dir_rgb, self.rgb_paths[index])
+        depth_map_path = os.path.join(self.dir_depth_map, self.depth_map_paths[index])
+        data_rgb = read_image_data(rgb_path)  # needs to be a tensor
+        data_depth_map = read_image_data(depth_map_path)  # needs to be a tensor
 
         # Only take one channel for the depth map
         data_depth_map = torch.tensor(data_depth_map).float()
