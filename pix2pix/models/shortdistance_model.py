@@ -104,7 +104,7 @@ class ShortDistanceModel(BaseModel, ABC):
         rgb_img_vis, depth_img_vis, pred_depth_map_img_vis = self.get_current_visuals()
         writer.add_image('%s/inputs' % name, rgb_img_vis, epoch)
         writer.add_image('%s/gt' % name, depth_img_vis, epoch)
-        writer.add_image('%s/pred_depth % name', pred_depth_map_img_vis, epoch)
+        writer.add_image('%s/pred_depth' % name, pred_depth_map_img_vis, epoch)
 
     def record_performance(self):
         metrics = compute_metrics(self.pred_depth_map_img, self.depth_map_img)
