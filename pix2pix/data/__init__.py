@@ -102,7 +102,12 @@ class CustomDatasetDataLoader():
                 ]
             )
         dataset_class = find_dataset_using_name(opt.dataset_mode)
-        self.dataset = dataset_class(opt, transform=transform)
+        if train:
+            opt.phase = 'train'
+            self.dataset = dataset_class(opt, transform=transform)
+        else:
+            opt.phase = 'test'
+            self.dataset = dataset_class(opt, transform=transform)
         print("dataset [%s] was created" % type(self.dataset).__name__)
 
 
