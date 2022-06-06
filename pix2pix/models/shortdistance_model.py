@@ -110,7 +110,7 @@ class ShortDistanceModel(BaseModel, ABC):
         metrics = compute_metrics(self.pred_depth_map_img, self.depth_map_img)
         for idx, item in enumerate(self.total_metrics):
             self.total_metrics[idx] += metrics[idx]
-            self.total_times += 1
+        self.total_times += 1
 
     def write_performance(self, writer, epoch, name):
         log = np.array(self.total_metrics) / self.total_times
@@ -121,3 +121,5 @@ class ShortDistanceModel(BaseModel, ABC):
         writer.add_scalar('%s/a1' % name, log[4], epoch)
         writer.add_scalar('%s/a2' % name, log[5], epoch)
         writer.add_scalar('%s/a3' % name, log[6], epoch)
+        self.total_times = 0
+        self.total_metrics = [0] * 7
