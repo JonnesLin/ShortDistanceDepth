@@ -64,7 +64,7 @@ if __name__ == '__main__':
         model.record_performance()
         model.write_performance(writer, epoch, 'train')
         writer.add_scalar('train/loss', total_loss/i, epoch)
-
+        model.scheduler.step()
         model.eval()
         with torch.no_grad():
             total_loss = 0
