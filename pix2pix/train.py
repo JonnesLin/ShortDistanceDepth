@@ -18,19 +18,19 @@ See options/base_options.py and options/train_options.py for more training optio
 See training and test tips at: https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix/blob/master/docs/tips.md
 See frequently asked questions at: https://github.com/junyanz/pytorch-CycleGAN-and-pix2pix/blob/master/docs/qa.md
 """
-import os,sys
+import os
+import sys
 sys.path.append(os.getcwd())
-
-import time
 
 import torch as torch
 
 from options.train_options import TrainOptions
 from data import create_dataset, create_dataloader
 from models import create_model
-from util.visualizer import Visualizer, simply_print
+from util.visualizer import simply_print
 from tensorboardX import SummaryWriter
 from tqdm import tqdm
+
 
 if __name__ == '__main__':
     opt = TrainOptions().parse()  # get training options
