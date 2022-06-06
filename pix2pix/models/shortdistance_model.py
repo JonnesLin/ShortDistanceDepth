@@ -10,7 +10,8 @@ import torchvision.utils as vutils
 from ..util.visualizer import colormap
 from ..util.metrics import compute_metrics
 import numpy as np
-from loss_functions import ScaleAndShiftInvariantLoss
+from .loss_functions import ScaleAndShiftInvariantLoss
+
 
 class ShortDistanceModel(BaseModel, ABC):
     @staticmethod
@@ -46,7 +47,7 @@ class ShortDistanceModel(BaseModel, ABC):
         self.model = MidasNet(path=None).to(self.device)
 
         # define criterion
-        self.criterion = ScaleAndShiftInvariantLoss().to(self.device) # torch.nn.MSELoss().to(self.device)
+        self.criterion = ScaleAndShiftInvariantLoss().to(self.device)  # torch.nn.MSELoss().to(self.device)
 
         # define optimizer
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=1e-4, betas=(opt.beta1, 0.999))
@@ -75,7 +76,8 @@ class ShortDistanceModel(BaseModel, ABC):
         self.pred_depth_map_img = self.model(self.rgb_img)
 
     def calculate_loss(self):
-        self.loss = self.criterion(self.pred_depth_map_img, self.depth_map_img)
+        mask = torch.ones_like(self.rgb_img[:,0,:,:]).to(self.rgb_img.device)
+        self.loss = self.criterion(self.pred_depth_map_img, self.depth_map_img, mask)
 
     def update_model(self):
         self.optimizer.zero_grad()
