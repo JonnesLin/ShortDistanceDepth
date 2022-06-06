@@ -46,7 +46,7 @@ class ShortDistanceModel(BaseModel, ABC):
         self.model = MidasNet(path=None).to(self.device)
 
         # define criterion
-        self.criterion = torch.nn.L1Loss()
+        self.criterion = torch.nn.MSELoss().to(self.device)
 
         # define optimizer
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=1e-4, betas=(opt.beta1, 0.999))
