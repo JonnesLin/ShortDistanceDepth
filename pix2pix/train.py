@@ -58,10 +58,10 @@ if __name__ == '__main__':
             model.set_input_train(rgb_img, depth_img)  # unpack data from dataset and apply preprocessing
             model.optimize_parameters()  # calculate loss functions, get gradients, update network weights
             total_loss += model.get_current_losses()
+            model.record_performance()
         # Visualize training images
         model.write_visuals(writer, epoch, 'train')
         # Visualize training performance
-        model.record_performance()
         model.write_performance(writer, epoch, 'train')
         writer.add_scalar('train/loss', total_loss/i, epoch)
         model.scheduler.step()
@@ -75,11 +75,11 @@ if __name__ == '__main__':
                 model.forward()
                 model.calculate_loss()  # calculate loss functions
                 total_loss += model.get_current_losses()
+                model.record_performance()
 
             # Visualize training images
             model.write_visuals(writer, epoch, 'eval')
             # Visualize training performance
-            model.record_performance()
             model.write_performance(writer, epoch, 'eval')
             writer.add_scalar('eval/loss', total_loss / i, epoch)
 
