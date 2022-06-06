@@ -61,7 +61,7 @@ if __name__ == '__main__':
         # Visualize training images
         model.write_visuals(writer, epoch, 'train')
         # Visualize training performance
-        model.record_metrics()
+        model.record_performance()
         model.write_performance(writer, epoch, 'train')
         writer.add_scalar('train/loss', total_loss/i, epoch)
 
@@ -79,7 +79,7 @@ if __name__ == '__main__':
             # Visualize training images
             model.write_visuals(writer, epoch, 'eval')
             # Visualize training performance
-            model.record_metrics()
+            model.record_performance()
             model.write_performance(writer, epoch, 'eval')
             writer.add_scalar('eval/loss', total_loss / i, epoch)
 
