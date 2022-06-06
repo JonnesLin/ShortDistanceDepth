@@ -120,4 +120,4 @@ class ShortDistanceModel(BaseModel, ABC):
         writer.add_scalar('%s/sqrel' % name, log[3], epoch)
         writer.add_scalar('%s/a1' % name, log[4], epoch)
         writer.add_scalar('%s/a2' % name, log[5], epoch)
-        writer.add_scalar('%s/a3' % name, logs[6], epoch)
+        writer.add_scalar('%s/a3' % name, log[6], epoch)
