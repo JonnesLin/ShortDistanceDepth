@@ -14,7 +14,12 @@ def evaluate_process(pred, gt):
     mask = gt > 0
     pred = pred[mask]
     gt = gt[mask]
-
+    print('max gt:', torch.max(gt))
+    print('max pred:', torch.max(pred))
+    print('min gt:', torch.min(gt))
+    print('min pred:', torch.min(pred))
+    print('median gt:', torch.median(gt))
+    print('median pred:', torch.median(pred))
     ratio = torch.median(gt) / torch.median(pred)
     pred *= ratio
 
